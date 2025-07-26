@@ -95,7 +95,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
             expires: new Date(Date.now() + 5 * 60 * 60 * 1000), // 5 hours
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax'
+            sameSite: 'none'
         });
 
         return res.status(200).json({
