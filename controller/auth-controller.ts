@@ -1,3 +1,4 @@
+require("dotenv").config();
 import { NextFunction, Request, Response } from "express";
 import { dbClient } from "../config/db";
 import bcrypt from "bcrypt";
@@ -10,6 +11,8 @@ type IRegisterUser = {
     password: string;
 }
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email, password, name } = req.body as IRegisterUser;
@@ -18,6 +21,13 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
             return res.status(400).json({
                 success: false,
                 error: `Please fill the field${!email ? ' email' : ''}${!password ? ' password' : ''}`
+            });
+        }
+
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid email format"
             });
         }
 
@@ -39,7 +49,6 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
         return res.status(201).json({
             success: true,
             message: "User Created successfully.",
-            user,
         });
 
     } catch (error: any) {
@@ -59,6 +68,13 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
             });
         }
 
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid email format"
+            });
+        }
+
         const existUser = await dbClient.query('SELECT * FROM users WHERE email = $1', [email]);
 
         if (existUser.rows.length === 0) {
@@ -66,6 +82,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         }
 
         const user = existUser.rows[0];
+
         const matchPassword = await bcrypt.compare(password, user.password);
 
         if (!matchPassword) {
@@ -75,7 +92,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         const token = generateToken({ id: user.id, email: user.email });
 
         res.cookie('token', token, {
-            expires: new Date(Date.now() + 5 * 60 * 60 * 1000),
+            expires: new Date(Date.now() + 5 * 60 * 60 * 1000), // 5 hours
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax'
@@ -88,10 +105,10 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
                 id: user.id,
                 name: user.name,
                 email: user.email,
+                image_url: user.image_url,
                 created_at: user.created_at
             },
         });
-
 
     } catch (error: any) {
         console.error('Register Error:', error.message);

@@ -1,6 +1,7 @@
+require("dotenv").config();
 import { Client } from "pg";
 
 export const dbClient = new Client({
-    connectionString: "postgresql://postgres:srnimje844@db.pvgntkcsunchrcgfpind.supabase.co:5432/postgres",
+    connectionString: process.env.DB_URL,
     ssl: { rejectUnauthorized: false }
 });

@@ -1,3 +1,4 @@
+require("dotenv").config();
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
@@ -14,7 +15,7 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
         return res.status(400).json({ success: false, message: 'Please Login to access' });
     }
 
-    const decodedData: any = jwt.verify(token, 'SecretKey');
+    const decodedData: any = jwt.verify(token, process.env.SECRET_KEY!);
 
     req.userId = decodedData.id;
 

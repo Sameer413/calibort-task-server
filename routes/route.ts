@@ -1,5 +1,11 @@
 import express from "express"
-import { deleteUserById, getAllUser, getUserById, updateUserById, uploadOrUpdateUserImage } from "../controller/user-controller";
+import {
+    deleteUserById,
+    getAllUser,
+    getUserById,
+    updateUserById,
+    uploadOrUpdateUserImage
+} from "../controller/user-controller";
 import { loginUser, registerUser } from "../controller/auth-controller";
 import { isAuthenticated } from "../middleware/auth-middleware";
 import upload from "../middleware/multer";

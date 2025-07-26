@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import express from "express";
+import express, { Request, Response } from "express";
 import { dbClient } from "./config/db";
 import { createUsersTable } from "./config/tableInit";
 import router from "./routes/route";
@@ -22,6 +22,13 @@ app.use(cors({
 }));
 
 app.use('/api', router);
+
+app.get('/test', (req: Request, res: Response) => {
+    return res.status(200).json({
+        success: true,
+        message: "Server is working"
+    })
+})
 
 async function initializeDatabase() {
     try {

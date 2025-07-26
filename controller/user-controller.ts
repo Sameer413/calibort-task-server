@@ -3,21 +3,20 @@ import { dbClient } from "../config/db";
 import { IUser } from "../types/type";
 import { deleteFromCloudinary, uploadToCloudinary } from "../utils/cloudinary";
 
-
 export const getAllUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
         const users = await dbClient.query('SELECT name ,email, created_at FROM users');
 
         if (!users.rows.length) {
-            return res.status(409).json({ error: 'No User exists at this moment.' });
+            return res.status(404).json({ error: 'No User exists at this moment.' });
         }
 
 
         const allUser: IUser[] = users.rows;
 
 
-        return res.status(201).json({
+        return res.status(200).json({
             success: true,
             message: "User Retrieve successfully.",
             allUser,
@@ -25,7 +24,7 @@ export const getAllUser = async (req: Request, res: Response, next: NextFunction
 
 
     } catch (error: any) {
-        console.error('Register Error:', error.message);
+        console.error('Get All User Error:', error.message);
         res.status(500).json({ error: 'Server error during querying users' });
     }
 }
@@ -46,13 +45,13 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
         const user: IUser = dbRes.rows[0];
 
 
-        return res.status(201).json({
+        return res.status(200).json({
             success: true,
             message: "User Retrieve successfully.",
             user,
         });
     } catch (error: any) {
-        console.error('Register Error:', error.message);
+        console.error('GetUserById Error:', error.message);
         res.status(500).json({ error: 'Server error during querying users' });
     }
 }
@@ -91,13 +90,13 @@ export const updateUserById = async (req: Request, res: Response, next: NextFunc
 
         const user: IUser = dbRes.rows[0];
 
-        return res.status(201).json({
+        return res.status(200).json({
             success: true,
             message: "User updated successfully.",
             user,
         });
     } catch (error: any) {
-        console.error('Register Error:', error.message);
+        console.error('UpdateUser Error:', error.message);
         res.status(500).json({ error: 'Server error during querying users' });
     }
 }
@@ -114,7 +113,7 @@ export const deleteUserById = async (req: Request, res: Response, next: NextFunc
         }
 
         const dbRes = await dbClient.query(
-            `DELETE FROM users where id = $1`,
+            `DELETE FROM users where id = $1 RETURNING *`,
             [userId]
         );
         if (dbRes.rowCount === 0) {
@@ -127,7 +126,7 @@ export const deleteUserById = async (req: Request, res: Response, next: NextFunc
             deletedUser: dbRes.rows[0],
         });
     } catch (error: any) {
-        console.error('Register Error:', error.message);
+        console.error('DeleteUser Error:', error.message);
         res.status(500).json({ error: 'Server error during querying users' });
     }
 }
