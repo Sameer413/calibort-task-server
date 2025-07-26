@@ -9,28 +9,65 @@ import cookieParser from "cookie-parser";
 dotenv.config()
 
 const app = express();
+const PORT = process.env.PORT || 5555;
 
 app.use(express.json());
-
 app.use(cookieParser());
-
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cors({
-    origin: "http://localhost:3000",
-    credentials: true
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 }));
 
-app.use(router);
+app.use('/api', router);
 
+async function initializeDatabase() {
+    try {
+        await dbClient.connect();
+        console.log("Database connected successfully");
 
+        await createUsersTable();
+        console.log("Database tables initialized");
+    } catch (error) {
+        console.error("Database initialization failed:", error);
+        process.exit(1); // Exit if database connection fails
+    }
+}
 
-app.listen(process.env.PORT || 5555, () => {
-    console.log("Server is running");
+async function startServer() {
+    try {
+        await initializeDatabase();
 
-    dbClient.connect()
-        .then(() => console.log("Database connected successfully"))
-        .catch((e: Error) => console.error(e.message));
+        const server = app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+            console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+        });
 
-    createUsersTable();
-});
+        server.on('error', (error: NodeJS.ErrnoException) => {
+            if (error.syscall !== 'listen') {
+                throw error;
+            }
+
+            switch (error.code) {
+                case 'EACCES':
+                    console.error(`Port ${PORT} requires elevated privileges`);
+                    process.exit(1);
+                    break;
+                case 'EADDRINUSE':
+                    console.error(`Port ${PORT} is already in use`);
+                    process.exit(1);
+                    break;
+                default:
+                    throw error;
+            }
+        });
+
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+}
+
+startServer();
