@@ -30,6 +30,13 @@ app.get('/test', (req: Request, res: Response) => {
     })
 })
 
+app.get('/', (req: Request, res: Response) => {
+    return res.status(200).json({
+        success: true,
+        message: "Server is working"
+    })
+})
+
 async function initializeDatabase() {
     try {
         await dbClient.connect();
