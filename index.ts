@@ -21,7 +21,7 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 }));
 
-app.use('/api', router);
+app.use(router);
 
 app.get('/test', (req: Request, res: Response) => {
     return res.status(200).json({
