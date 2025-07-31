@@ -208,6 +208,7 @@ export const uploadOrUpdateUserImage = async (req: Request, res: Response, next:
 export const syncThirdPartyUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { data } = req.body;
+        console.log("here");
 
         if (!data || !Array.isArray(data)) {
             return res.status(404).json({
@@ -215,21 +216,18 @@ export const syncThirdPartyUsers = async (req: Request, res: Response, next: Nex
                 error: "Invalid user data"
             })
         }
+        console.log("here1");
 
         for (const user of data) {
             await dbClient.query(
                 `INSERT INTO third_users (id, email, first_name, last_name, avatar)
                     VALUES ($1, $2, $3, $4, $5)
-                    ON CONFLICT (id)
-                    DO UPDATE SET
-                        email = EXCLUDED.email,
-                        first_name = EXCLUDED.first_name,
-                        last_name = EXCLUDED.last_name,
-                        avatar = EXCLUDED.avatar`,
+                    ON CONFLICT (id) DO NOTHING`,
 
                 [user.id, user.email, user.first_name, user.last_name, user.avatar]
             )
         }
+        console.log("here2");
 
         res.status(200).json({
             success: true,
