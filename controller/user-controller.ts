@@ -204,3 +204,69 @@ export const uploadOrUpdateUserImage = async (req: Request, res: Response, next:
         res.status(500).json({ error: 'Server error during uploading or updating user image' });
     }
 }
+
+export const syncThirdPartyUsers = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { data } = req.body;
+
+        if (!data || !Array.isArray(data)) {
+            return res.status(404).json({
+                success: false,
+                error: "Invalid user data"
+            })
+        }
+
+        for (const user of data) {
+            await dbClient.query(
+                `INSERT INTO third_users (id, email, first_name, last_name, avatar)
+                    VALUES ($1, $2, $3, $4, $5)
+                    ON CONFLICT (id)
+                    DO UPDATE SET
+                        email = EXCLUDED.email,
+                        first_name = EXCLUDED.first_name,
+                        last_name = EXCLUDED.last_name,
+                        avatar = EXCLUDED.avatar`,
+
+                [user.id, user.email, user.first_name, user.last_name, user.avatar]
+            )
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Users saved successfully."
+        })
+    } catch (error: any) {
+        console.error('Sync User Error:', error.message);
+        res.status(500).json({ error: 'Server error during syncing the users.' });
+    }
+}
+
+export const getThirdPartyUserById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.params.id;
+
+        const result = await dbClient.query(
+            `SELECT * FROM third_users WHERE id = $1`,
+            [userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            user: result.rows[0]
+        });
+
+    } catch (error: any) {
+        console.error('Fetch User Error:', error.message);
+        return res.status(500).json({
+            success: false,
+            error: 'Server error while fetching user'
+        });
+    }
+};

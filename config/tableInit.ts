@@ -18,6 +18,15 @@ export const createUsersTable = async () => {
         );
       `);
 
+    await dbClient.query(`
+      CREATE TABLE IF NOT EXISTS third_users (
+      id INTEGER PRIMARY KEY,
+      email VARCHAR(100),
+      first_name VARCHAR(100),
+      last_name VARCHAR(100),
+      avatar TEXT
+    );`)
+
     console.log('users table created or already exists');
   } catch (err: any) {
     console.error('Failed to create table:', err.message);

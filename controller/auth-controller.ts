@@ -94,7 +94,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
         res.cookie('token', token, {
             expires: new Date(Date.now() + 5 * 60 * 60 * 1000), // 5 hours
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            // secure: process.env.NODE_ENV === 'production',
             sameSite: 'none'
         });
 
@@ -113,5 +113,25 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
     } catch (error: any) {
         console.error('Register Error:', error.message);
         res.status(500).json({ error: 'Server error during registration' });
+    }
+}
+
+export const signOut = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        res.cookie('token', null, {
+            expires: new Date(0), // 5 hours
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'none'
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Logout successful.",
+        });
+
+    } catch (error: any) {
+        console.error('LogOut Error:', error.message);
+        res.status(500).json({ error: 'Server error during Logout' });
     }
 }
