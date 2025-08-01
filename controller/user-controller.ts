@@ -76,8 +76,8 @@ export const updateUserById = async (req: Request, res: Response, next: NextFunc
 
         const dbRes = await dbClient.query(
             `UPDATE users
-                SET name = COALESCE($1, name),
-                email = COALESCE($2, email),
+            SET name = COALESCE($1, name),
+                email = COALESCE($2, email)
             WHERE id = $3
             RETURNING *`,
             [name, email, userId]
